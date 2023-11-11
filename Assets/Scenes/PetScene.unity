@@ -168,7 +168,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40bfe2e898373d240a2e59920b6643aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  density: 500
+  density: 1000
   noiseMax: 0.1
   maxHeight: 0.01
   shellCount: 512
