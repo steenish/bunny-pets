@@ -171,6 +171,7 @@ MonoBehaviour:
   density: 1000
   noiseMax: 0.1
   maxHeight: 0.01
+  gravity: 0.005
   shellCount: 512
   furPrefab: {fileID: 4117174743015719626, guid: b1b6cb6aec683e84f86c835c4af96140, type: 3}
 --- !u!1 &705507993

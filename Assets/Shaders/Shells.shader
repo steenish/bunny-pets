@@ -52,12 +52,14 @@ Shader "Unlit/Shells"
             float _NoiseMax;
             float _MaxHeight;
             float _NormalizedHeight;
+            float _Gravity;
 
             v2f vert(appdata v)
             {
                 v2f o;
                 float shellHeight = _MaxHeight * _NormalizedHeight;
-                o.vertex = UnityObjectToClipPos(v.vertex + v.normal * shellHeight);
+                float3 gravityDisplacement = float3(0, 0, -1) * _Gravity * _NormalizedHeight * _NormalizedHeight;
+                o.vertex = UnityObjectToClipPos(v.vertex + v.normal * shellHeight + gravityDisplacement);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 o.shellHeight = shellHeight;
                 UNITY_TRANSFER_FOG(o,o.vertex);

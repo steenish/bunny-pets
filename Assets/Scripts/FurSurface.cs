@@ -8,6 +8,8 @@ public class FurSurface : MonoBehaviour {
     [SerializeField]
     private float maxHeight;
     [SerializeField]
+    private float gravity;
+    [SerializeField]
     private int shellCount;
     [SerializeField]
     private GameObject furPrefab;
@@ -27,6 +29,7 @@ public class FurSurface : MonoBehaviour {
                 furMaterial.SetInteger("_Density", density);
                 furMaterial.SetFloat("_NoiseMax", noiseMax);
                 furMaterial.SetFloat("_MaxHeight", maxHeight);
+                furMaterial.SetFloat("_Gravity", gravity);
             }
             shellRenderer.material = furMaterial;
             shellGameObject.name = $"Shell {i}";
@@ -36,5 +39,12 @@ public class FurSurface : MonoBehaviour {
             mpb.SetFloat("_NormalizedHeight", normalizedHeight);
             shellRenderer.SetPropertyBlock(mpb);
         }
+    }
+
+    private void Update() {
+        furMaterial.SetInteger("_Density", density);
+        furMaterial.SetFloat("_NoiseMax", noiseMax);
+        furMaterial.SetFloat("_MaxHeight", maxHeight);
+        furMaterial.SetFloat("_Gravity", gravity);
     }
 }
