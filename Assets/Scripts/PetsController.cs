@@ -80,7 +80,6 @@ public class PetsController : MonoBehaviour {
     private void ClampRotation() {
         Vector3 eulerAngles = transform.rotation.eulerAngles;
         float xAngle = eulerAngles.x;
-        Debug.Log(xAngle);
         float clampToAngle = 70.0f;
         if(xAngle >= clampToAngle && xAngle < 180.0f) {
             xAngle = clampToAngle;
