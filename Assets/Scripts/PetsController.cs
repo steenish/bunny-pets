@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public struct InputData {
     public float rightLeftAxisRaw;
@@ -10,6 +11,8 @@ public struct InputData {
     public float mouseXAxis;
     public float mouseYAxis;
     public bool quit;
+    public bool mousePressed;
+    public Vector2 mouseScreenPosition;
 }
 
 public class PetsController : MonoBehaviour {
@@ -19,12 +22,26 @@ public class PetsController : MonoBehaviour {
     private float translateSmoothing;
     [SerializeField]
     private float rotateSpeed;
+    [SerializeField]
+    private int vectorFieldSize;
+    [SerializeField]
+    private RawImage rawImage;
 
+    private Camera mainCamera;
     private InputData inputData;
     private Vector3 targetPosition;
+    private Texture2D vectorFieldTexture;
+    private bool hitLastUpdate;
+    private Vector2 lastHitUv;
 
     private void Awake() {
         targetPosition = transform.position;
+        mainCamera = GetComponent<Camera>();
+        vectorFieldTexture = new(vectorFieldSize, vectorFieldSize, TextureFormat.ARGB32, false, true);
+    }
+
+    private void Start() {
+        rawImage.texture = vectorFieldTexture;
     }
 
     private void Update() {
@@ -42,6 +59,8 @@ public class PetsController : MonoBehaviour {
         inputData.mouseXAxis = Input.GetAxis("Mouse X");
         inputData.mouseYAxis = Input.GetAxis("Mouse Y");
         inputData.quit = Input.GetKeyDown(KeyCode.Escape);
+        inputData.mousePressed = Input.GetMouseButton(0);
+        inputData.mouseScreenPosition = Input.mousePosition;
     }
 
     private void HandleQuitting() {
@@ -92,6 +111,25 @@ public class PetsController : MonoBehaviour {
     }
 
     private void Pets() {
-
+        if(!inputData.unlockMouse || !inputData.mousePressed) {
+            hitLastUpdate = false;
+            return;
+        }
+        Ray ray = mainCamera.ScreenPointToRay(inputData.mouseScreenPosition);
+        if(!Physics.Raycast(ray, out RaycastHit hitInfo)) {
+            hitLastUpdate = false;
+            return;
+        }
+        Vector2 hitUv = hitInfo.textureCoord;
+        if(hitLastUpdate) {
+            Vector2 petDirection = (hitUv - lastHitUv).normalized;
+            int pixelX = Mathf.FloorToInt(hitUv.x * vectorFieldSize);
+            int pixelY = Mathf.FloorToInt(hitUv.y * vectorFieldSize);
+            Color directionColor = new Color(petDirection.x, petDirection.y, 0.0f);
+            vectorFieldTexture.SetPixel(pixelX, pixelY, directionColor);
+            vectorFieldTexture.Apply();
+        }
+        lastHitUv = hitUv;
+        hitLastUpdate = true;
     }
 }
