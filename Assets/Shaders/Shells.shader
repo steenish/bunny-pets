@@ -4,9 +4,6 @@ Shader "Unlit/Shells"
     {
         _MainTex ("Color", 2D) = "white" {}
         _LengthTex ("Length", 2D) = "white" {}
-        _Density ("Density", Integer) = 200
-        _NoiseMax ("Max Noise Value", Float) = 0.1
-        _MaxHeight ("Max Shell Height", Float) = 0.01
     }
     SubShader
     {
@@ -28,6 +25,7 @@ Shader "Unlit/Shells"
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
                 float3 normal : NORMAL;
+                float3 tangent : TANGENT;
             };
 
             float hash(uint n) {
@@ -35,6 +33,22 @@ Shader "Unlit/Shells"
                 n = (n << 13U) ^ n;
                 n = n * (n * n * 15731U + 7901729U) + 83587310985U;
                 return float(n & uint(0x7fffffffU)) / float(0x7fffffff);
+            }
+
+            float3 rotateAroundAxis(float3 In, float3 Axis, float Rotation) {
+                Rotation = radians(Rotation);
+                float s = sin(Rotation);
+                float c = cos(Rotation);
+                float one_minus_c = 1.0 - c;
+
+                Axis = normalize(Axis);
+                float3x3 rot_mat =
+                {
+                    one_minus_c * Axis.x * Axis.x + c, one_minus_c * Axis.x * Axis.y - Axis.z * s, one_minus_c * Axis.z * Axis.x + Axis.y * s,
+                    one_minus_c * Axis.x * Axis.y + Axis.z * s, one_minus_c * Axis.y * Axis.y + c, one_minus_c * Axis.y * Axis.z - Axis.x * s,
+                    one_minus_c * Axis.z * Axis.x - Axis.y * s, one_minus_c * Axis.y * Axis.z + Axis.x * s, one_minus_c * Axis.z * Axis.z + c
+                };
+                return mul(rot_mat, In);
             }
 
             struct v2f
@@ -48,18 +62,24 @@ Shader "Unlit/Shells"
             sampler2D _MainTex;
             float4 _MainTex_ST;
             sampler2D _LengthTex;
+            sampler2D _VectorField;
             uint _Density;
             float _NoiseMax;
             float _MaxHeight;
             float _NormalizedHeight;
             float _Gravity;
+            float _ForceInfluence;
 
             v2f vert(appdata v)
             {
                 v2f o;
                 float shellHeight = _MaxHeight * _NormalizedHeight;
                 float3 gravityDisplacement = float3(0, 0, -1) * _Gravity * _NormalizedHeight * _NormalizedHeight;
-                o.vertex = UnityObjectToClipPos(v.vertex + v.normal * shellHeight + gravityDisplacement);
+                float2 vectorFieldSample = tex2Dlod(_VectorField, float4(v.uv, 0, 0));
+                float3 vectorFieldDirection = rotateAroundAxis(v.tangent, v.normal, 360 * vectorFieldSample.x);
+                float actualForceInfluence = lerp(0, _ForceInfluence, vectorFieldSample.y);
+                float3 forceDisplacement = vectorFieldDirection * actualForceInfluence * _NormalizedHeight * _NormalizedHeight;
+                o.vertex = UnityObjectToClipPos(v.vertex + v.normal * shellHeight + gravityDisplacement + forceDisplacement);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 o.shellHeight = shellHeight;
                 UNITY_TRANSFER_FOG(o,o.vertex);
@@ -85,7 +105,7 @@ Shader "Unlit/Shells"
                 fixed4 color = tex2D(_MainTex, i.uv);
                 UNITY_APPLY_FOG(i.fogCoord, color);
                 return color;
-            }
+}
             ENDCG
         }
     }

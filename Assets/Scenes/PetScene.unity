@@ -172,6 +172,7 @@ MonoBehaviour:
   noiseMax: 0.1
   maxHeight: 0.01
   gravity: 0.005
+  forceInfluence: 0.05
   shellCount: 512
   furPrefab: {fileID: 4117174743015719626, guid: b1b6cb6aec683e84f86c835c4af96140, type: 3}
 --- !u!1 &705507993
@@ -378,6 +379,7 @@ MonoBehaviour:
   rotateSpeed: 100
   vectorFieldSize: 100
   rawImage: {fileID: 1609132432}
+  furSurface: {fileID: 183961339}
 --- !u!1 &990679005
 GameObject:
   m_ObjectHideFlags: 0

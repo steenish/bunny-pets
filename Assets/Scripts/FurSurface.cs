@@ -10,6 +10,8 @@ public class FurSurface : MonoBehaviour {
     [SerializeField]
     private float gravity;
     [SerializeField]
+    private float forceInfluence;
+    [SerializeField]
     private int shellCount;
     [SerializeField]
     private GameObject furPrefab;
@@ -26,10 +28,7 @@ public class FurSurface : MonoBehaviour {
             MeshRenderer shellRenderer = shellGameObject.GetComponent<MeshRenderer>();
             if(i == 0) {
                 furMaterial = shellRenderer.material;
-                furMaterial.SetInteger("_Density", density);
-                furMaterial.SetFloat("_NoiseMax", noiseMax);
-                furMaterial.SetFloat("_MaxHeight", maxHeight);
-                furMaterial.SetFloat("_Gravity", gravity);
+                SetShaderValues();
             }
             shellRenderer.material = furMaterial;
             shellGameObject.name = $"Shell {i}";
@@ -42,9 +41,18 @@ public class FurSurface : MonoBehaviour {
     }
 
     private void Update() {
+        SetShaderValues();
+    }
+
+    private void SetShaderValues() {
         furMaterial.SetInteger("_Density", density);
         furMaterial.SetFloat("_NoiseMax", noiseMax);
         furMaterial.SetFloat("_MaxHeight", maxHeight);
         furMaterial.SetFloat("_Gravity", gravity);
+        furMaterial.SetFloat("_ForceInfluence", forceInfluence);
+    }
+
+    public void SetVectorField(Texture2D vectorFieldTexture) {
+        furMaterial.SetTexture("_VectorField", vectorFieldTexture);
     }
 }
