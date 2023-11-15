@@ -12,6 +12,10 @@ public class FurSurface : MonoBehaviour {
     [SerializeField]
     private float forceInfluence;
     [SerializeField]
+    private float attenuation;
+    [SerializeField]
+    private float occlusionBias;
+    [SerializeField]
     private int shellCount;
     [SerializeField]
     private GameObject furPrefab;
@@ -50,6 +54,8 @@ public class FurSurface : MonoBehaviour {
         furMaterial.SetFloat("_MaxHeight", maxHeight);
         furMaterial.SetFloat("_Gravity", gravity);
         furMaterial.SetFloat("_ForceInfluence", forceInfluence);
+        furMaterial.SetFloat("_Attenuation", attenuation);
+        furMaterial.SetFloat("_OcclusionBias", occlusionBias);
     }
 
     public void SetVectorField(Texture2D vectorFieldTexture) {

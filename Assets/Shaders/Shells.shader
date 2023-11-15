@@ -19,6 +19,8 @@ Shader "Unlit/Shells"
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
+			#include "UnityPBSLighting.cginc"
+            #include "AutoLight.cginc"
 
             struct appdata
             {
@@ -57,7 +59,8 @@ Shader "Unlit/Shells"
                 UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
                 float shellHeight : TEXCOORD1;
-            };
+                float3 normal : TEXCOORD2;
+};
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
@@ -69,6 +72,8 @@ Shader "Unlit/Shells"
             float _NormalizedHeight;
             float _Gravity;
             float _ForceInfluence;
+            float _Attenuation;
+            float _OcclusionBias;
 
             v2f vert(appdata v)
             {
@@ -82,11 +87,12 @@ Shader "Unlit/Shells"
                 o.vertex = UnityObjectToClipPos(v.vertex + v.normal * shellHeight + gravityDisplacement + forceDisplacement);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 o.shellHeight = shellHeight;
+                o.normal = v.normal;
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 return o;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            float4 frag (v2f i) : SV_Target
             {
                 float sampledLength = tex2D(_LengthTex, i.uv).x;
                 float wantedLength = lerp(0.0, _MaxHeight, sampledLength);
@@ -102,10 +108,16 @@ Shader "Unlit/Shells"
                 {
                     discard;
                 }
-                fixed4 color = tex2D(_MainTex, i.uv);
-                UNITY_APPLY_FOG(i.fogCoord, color);
-                return color;
-}
+                float3 color = tex2D(_MainTex, i.uv).rgb;
+                float ndotl = DotClamped(i.normal, _WorldSpaceLightPos0) * 0.5f + 0.5f;
+                ndotl = ndotl * ndotl;
+                float ambientOcclusion = pow(_NormalizedHeight, _Attenuation);
+                ambientOcclusion += _OcclusionBias;
+                ambientOcclusion = saturate(ambientOcclusion);
+                float4 finalColor = float4(color * ndotl * ambientOcclusion, 1.0);
+                UNITY_APPLY_FOG(i.fogCoord, finalColor);
+                return finalColor;
+            }
             ENDCG
         }
     }
