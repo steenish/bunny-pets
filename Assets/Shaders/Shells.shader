@@ -7,11 +7,14 @@ Shader "Unlit/Shells"
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
-        LOD 100
+        Tags {
+			"RenderMode" = "Opaque"
+		}
 
         Pass
         {
+            Cull Off
+
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -19,8 +22,6 @@ Shader "Unlit/Shells"
             #pragma multi_compile_fog
 
             #include "UnityCG.cginc"
-			#include "UnityPBSLighting.cginc"
-            #include "AutoLight.cginc"
 
             struct appdata
             {
@@ -72,8 +73,6 @@ Shader "Unlit/Shells"
             float _NormalizedHeight;
             float _Gravity;
             float _ForceInfluence;
-            float _Attenuation;
-            float _OcclusionBias;
 
             v2f vert(appdata v)
             {
@@ -108,15 +107,7 @@ Shader "Unlit/Shells"
                 {
                     discard;
                 }
-                float3 color = tex2D(_MainTex, i.uv).rgb;
-                float ndotl = DotClamped(i.normal, _WorldSpaceLightPos0) * 0.5f + 0.5f;
-                ndotl = ndotl * ndotl;
-                float ambientOcclusion = pow(_NormalizedHeight, _Attenuation);
-                ambientOcclusion += _OcclusionBias;
-                ambientOcclusion = saturate(ambientOcclusion);
-                float4 finalColor = float4(color * ndotl * ambientOcclusion, 1.0);
-                UNITY_APPLY_FOG(i.fogCoord, finalColor);
-                return finalColor;
+                return float4(tex2D(_MainTex, i.uv).rgb, 1.0f);;
             }
             ENDCG
         }

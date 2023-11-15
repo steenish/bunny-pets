@@ -379,7 +379,7 @@ MonoBehaviour:
   translateSpeed: 0.4
   translateSmoothing: 20
   rotateSpeed: 100
-  vectorFieldSize: 100
+  vectorFieldSize: 20
   rawImage: {fileID: 1609132432}
   furSurface: {fileID: 183961339}
 --- !u!1 &990679005
@@ -634,7 +634,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1609132430}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
